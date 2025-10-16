@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jessie's Book Manager</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: #333; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f0f0f0; }
+    input { margin: 5px; padding: 5px; }
+    button { margin: 5px; padding: 8px 12px; cursor: pointer; }
+    .error { color: red; font-size: 14px; }
+    .section { margin-top: 25px; }
+  </style>
+</head>
+<body>
+  <h1>📚 Jessie's Book Manager</h1>
+
+  <!-- Table to display the three books I chose -->
+  <table id="bookTable">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Author</th>
+        <th>Year</th>
+        <th>Genre</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <!-- Add a Book Section -->
+  <div class="section">
+    <h3>Add a New Book</h3>
+    <input type="text" id="addTitle" placeholder="Title">
+    <input type="text" id="addAuthor" placeholder="Author">
+    <input type="number" id="addYear" placeholder="Year">
+    <input type="text" id="addGenre" placeholder="Genre">
+    <button onclick="addBook()">Add Book</button>
+  </div>
+
+  <!-- Update a Book Section -->
+  <div class="section">
+    <h3>Update a Book</h3>
+    <input type="text" id="updateTitle" placeholder="Existing Title">
+    <input type="text" id="newAuthor" placeholder="New Author">
+    <input type="number" id="newYear" placeholder="New Year">
+    <input type="text" id="newGenre" placeholder="New Genre">
+    <button onclick="updateBook()">Update Book</button>
+  </div>
+
+  <!-- Remove a Book Section -->
+  <div class="section">
+    <h3>Remove a Book</h3>
+    <input type="text" id="removeTitle" placeholder="Title to Remove">
+    <button onclick="removeBook()">Remove</button>
+  </div>
+
+  <p id="errorMsg" class="error"></p>
+
+  <script>
+    // JSON data
+    let bookData = {
+      "books": [
+        { "title": "The Summer I Turned Pretty", "author": "Jenny Han", "year": 2009, "genre": "Young Adult" },
+        { "title": "The Fault in Our Stars", "author": "John Green", "year": 2012, "genre": "Romance" },
+        { "title": "One of Us is Lying", "author": "Karen M. McManus", "year": 2017, "genre": "Mystery" }
+      ]
+    };
+
+    // Display JSON data in the table
+    function displayBooks() {
+      const tableBody = document.querySelector("#bookTable tbody");
+      tableBody.innerHTML = "";
+      bookData.books.forEach(book => {
+        const row = `<tr>
+          <td>${book.title}</td>
+          <td>${book.author}</td>
+          <td>${book.year}</td>
+          <td>${book.genre}</td>
+        </tr>`;
+        tableBody.innerHTML += row;
+      });
+    }
+
+    // Add a new book
+    function addBook() {
+      const title = document.getElementById("addTitle").value.trim();
+      const author = document.getElementById("addAuthor").value.trim();
+      const year = parseInt(document.getElementById("addYear").value);
+      const genre = document.getElementById("addGenre").value.trim();
+      const errorMsg = document.getElementById("errorMsg");
+
+      if (!title || !author || !year || !genre) {
+        errorMsg.textContent = "Please fill in all fields before adding a book.";
+        return;
+      }
+      if (isNaN(year) || year < 0) {
+        errorMsg.textContent = "Year must be a valid positive number.";
+        return;
+      }
+
+      // Check for duplicate title
+      if (bookData.books.find(book => book.title === title)) {
+        errorMsg.textContent = "A book with this title already exists.";
+        return;
+      }
+
+      errorMsg.textContent = "";
+      bookData.books.push({ title, author, year, genre });
+      displayBooks();
+
+      document.getElementById("addTitle").value = "";
+      document.getElementById("addAuthor").value = "";
+      document.getElementById("addYear").value = "";
+      document.getElementById("addGenre").value = "";
+    }
+
+    // Update existing book
+    function updateBook() {
+      const title = document.getElementById("updateTitle").value.trim();
+      const newAuthor = document.getElementById("newAuthor").value.trim();
+      const newYear = parseInt(document.getElementById("newYear").value);
+      const newGenre = document.getElementById("newGenre").value.trim();
+      const errorMsg = document.getElementById("errorMsg");
+
+      if (!title || !newAuthor || !newYear || !newGenre) {
+        errorMsg.textContent = "Please fill in all fields before updating a book.";
+        return;
+      }
+      if (isNaN(newYear) || newYear < 0) {
+        errorMsg.textContent = "Year must be a valid positive number.";
+        return;
+      }
+
+      const existingBook = bookData.books.find(book => book.title === title);
+      if (!existingBook) {
+        errorMsg.textContent = "No book found with that title.";
+        return;
+      }
+
+      existingBook.author = newAuthor;
+      existingBook.year = newYear;
+      existingBook.genre = newGenre;
+      errorMsg.textContent = "";
+      displayBooks();
+
+      document.getElementById("updateTitle").value = "";
+      document.getElementById("newAuthor").value = "";
+      document.getElementById("newYear").value = "";
+      document.getElementById("newGenre").value = "";
+    }
+
+    // Remove a book
+    function removeBook() {
+      const titleToRemove = document.getElementById("removeTitle").value.trim();
+      const errorMsg = document.getElementById("errorMsg");
+
+      if (!titleToRemove) {
+        errorMsg.textContent = "Please enter the title of the book to remove.";
+        return;
+      }
+
+      const initialLength = bookData.books.length;
+      bookData.books = bookData.books.filter(book => book.title !== titleToRemove);
+
+      if (bookData.books.length === initialLength) {
+        errorMsg.textContent = "No book found with that title.";
+      } else {
+        errorMsg.textContent = "";
+      }
+
+      displayBooks();
+      document.getElementById("removeTitle").value = "";
+    }
+
+    // Initial display
+    displayBooks();
+  </script>
+</body>
+</html>
